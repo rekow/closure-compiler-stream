@@ -1,0 +1,23 @@
+{
+  "name": "closure-compiler-stream",
+  "description": "Simple stream interface for closure compiler, with full pipe support.",
+  "version": "0.1.0",
+  "keywords": ["closure", "closure compiler", "stream", "gulp"],
+  "homepage": "https://github.com/davidrekow/closure-compiler-stream",
+  "author": {
+    "name": "David Rekow",
+    "email": "d@davidrekow.com",
+    "url": "http://github.com/davidrekow"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidrekow/closure-compiler-stream.git"
+  },
+  "bugs": "https://github.com/davidrekow/closure-compiler-stream/issues",
+  "license": "MIT",
+  "dependencies": {
+    "through2": "~0.5.1",
+    "closure-compiler": "~0.2.6"
+  },
+  "main": "index"
+}
