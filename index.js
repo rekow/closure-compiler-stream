@@ -1,7 +1,7 @@
 var cc = require('closure-compiler'),
   through2 = require('through2'),
-  stream = require('stream'),
-
+  tmp = require('temp-write'),
+  fs = require('fs'),
   exec = require('child_process').exec,
 
   merge = function (obj1, obj2) {
@@ -42,7 +42,10 @@ var cc = require('closure-compiler'),
 
 module.exports = function (options) {
   var files = [],
-    proxy = new stream.PassThrough(),
+    proxy = through2.obj(function (file, enc, cb) {
+      this.push(file);
+      cb();
+    }),
     transform;
 
   transform = through2.obj(function (file, enc, cb) {
@@ -73,11 +76,30 @@ module.exports = function (options) {
     args.push(flattenFlags(opts));
 
     exec(args.join(' '), function (err, out) {
+      var filename, file;
       if (err) {
         proxy.emit('error', err);
         return;
       }
-      proxy.end(out);
+      filename = opts.js_output_file || tmp.sync(out);
+      file = fs.lstatSync(filename);
+
+      file.contents = out.toString('utf8');
+      file.relative = filename.split('/').pop()
+      file.base = filename.split('/').slice(0, -1).join('/');
+      file.cwd = process.cwd();
+
+      file.isStream = function () {
+        return false
+      };
+      file.isBuffer = function () {
+        return out instanceof Buffer;
+      };
+      file.isNull = function () {
+        return !!file.contents;
+      };
+
+      proxy.end(file);
     });
 
   });
