@@ -2,6 +2,7 @@ var cc = require('closure-compiler'),
   through2 = require('through2'),
   tmp = require('temp-write'),
   fs = require('fs'),
+  stream = require('stream'),
   exec = require('child_process').exec,
 
   merge = function (obj1, obj2) {
@@ -50,11 +51,11 @@ module.exports = function (options) {
 
   transform = through2.obj(function (file, enc, cb) {
 
-    if (file.isNull()) {
+    if (!file || file.contents === null) {
       this.push(file);
       return cb();
     }
-    if (file.isStream()) {
+    if (file.contents instanceof stream.Stream) {
       this.emit('error', 'streaming not supported');
       return cb();
     }
@@ -93,10 +94,10 @@ module.exports = function (options) {
         return false
       };
       file.isBuffer = function () {
-        return out instanceof Buffer;
+        return false;
       };
       file.isNull = function () {
-        return !!file.contents;
+        return file.contents === null;
       };
 
       proxy.end(file);
