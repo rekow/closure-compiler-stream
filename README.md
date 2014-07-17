@@ -66,4 +66,4 @@ gulp.task('closure:sourcemap', function () {
 ```javascript
 closure(options)
 ```
-Accepts the same options hash as [closure-compiler](https://www.npmjs.org/package/closure-compiler), and returns a `Readable` stream.
+Accepts the same options hash as [closure-compiler](https://www.npmjs.org/package/closure-compiler), and returns a `Writable` stream.

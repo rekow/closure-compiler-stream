@@ -8,7 +8,7 @@ var cc = require('closure-compiler'),
   merge = function (obj1, obj2) {
     for (var k in obj2) {
       if (obj2.hasOwnProperty(k)) {
-        obj1[k] = obj2[k]
+        obj1[k] = obj2[k];
       }
     }
     return obj1;
@@ -68,7 +68,7 @@ module.exports = function (options) {
         js: files
       }, options);
 
-    args.push('java')
+    args.push('java');
     args.push('-jar');
     args.push(opts.jar ? opts.jar : cc.JAR_PATH);
 
@@ -77,7 +77,7 @@ module.exports = function (options) {
     args.push(flattenFlags(opts));
 
     exec(args.join(' '), function (err, out) {
-      var filename, file;
+      var filename, file, pathParts;
       if (err) {
         proxy.emit('error', err);
         return;
@@ -85,13 +85,15 @@ module.exports = function (options) {
       filename = opts.js_output_file || tmp.sync(out);
       file = fs.lstatSync(filename);
 
+      pathParts = filename.split('/');
+
       file.contents = out.toString('utf8');
-      file.relative = filename.split('/').pop()
-      file.base = filename.split('/').slice(0, -1).join('/');
+      file.relative = pathParts.pop();
+      file.base = pathParts.join('/');
       file.cwd = process.cwd();
 
       file.isStream = function () {
-        return false
+        return false;
       };
       file.isBuffer = function () {
         return false;
@@ -106,7 +108,7 @@ module.exports = function (options) {
   });
 
   transform.pipe = function () {
-    return proxy.pipe.apply(proxy, arguments)
+    return proxy.pipe.apply(proxy, arguments);
   };
 
   return transform;
