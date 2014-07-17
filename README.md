@@ -61,9 +61,11 @@ gulp.task('closure:sourcemap', function () {
 });
 ```
 
-##api
+##API
 
 ```javascript
-closure(options)
+var writableStream = closure(options);
 ```
-Accepts the same options hash as [closure-compiler](https://www.npmjs.org/package/closure-compiler), and returns a `Writable` stream.
+`options` is a map of [flags](https://github.com/steida/gulp-closure-compiler/blob/master/flags.txt) to invoke the compiler with. Options accepts one additional key `jar`, which can be a string path to a Closure Compiler jar file - use this to override the version of Closure Compiler to use.
+
+Returns a `Writable` stream.
