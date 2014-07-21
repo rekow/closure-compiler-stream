@@ -57,7 +57,7 @@ gulp.task('closure:sourcemap', function () {
     .pipe(sourcemaps.init())
     .pipe(closure())
     .pipe(sourcemaps.write())
-    .pipe(gulp.dest('path/to/minifed/js/'));
+    .pipe(gulp.dest('path/to/minified/js/'));
 });
 ```
 
