@@ -76,18 +76,20 @@ module.exports = function (options) {
 
     args.push(flattenFlags(opts));
 
-    exec(args.join(' '), function (err, out) {
+    exec(args.join(' '), function (err, stdout, stderr) {
       var filename, file, pathParts;
       if (err) {
         proxy.emit('error', err);
         return;
       }
+      console.log('%s', stderr);
+
       filename = opts.js_output_file || tmp.sync(out);
       file = fs.lstatSync(filename);
 
       pathParts = filename.split('/');
 
-      file.contents = out.toString('utf8');
+      file.contents = stdout.toString('utf8');
       file.relative = pathParts.pop();
       file.base = pathParts.join('/');
       file.cwd = process.cwd();
