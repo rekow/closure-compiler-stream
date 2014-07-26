@@ -1,7 +1,7 @@
-var cc = require('closure-compiler'),
-  through2 = require('through2'),
+var through2 = require('through2'),
   tmp = require('temp-write'),
   fs = require('fs'),
+  path = require('path'),
   stream = require('stream'),
   exec = require('child_process').exec,
 
@@ -70,7 +70,7 @@ module.exports = function (options) {
 
     args.push('java');
     args.push('-jar');
-    args.push(opts.jar ? opts.jar : cc.JAR_PATH);
+    args.push(opts.jar ? opts.jar : path.absolute('./lib/compiler.jar'));
 
     delete opts.jar;
 

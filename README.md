@@ -6,7 +6,7 @@ Add to your `devDependencies`:
 ```javascript
   "dependencies": {...},
   "devDependencies": {
-    "closure-compiler-stream": "~0.1.2"
+    "closure-compiler-stream": "~0.1.8"
   },
   ...
 ```
