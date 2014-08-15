@@ -70,9 +70,17 @@ module.exports = function (options) {
 
     args.push('java');
     args.push('-jar');
-    args.push(opts.jar ? opts.jar : path.absolute('./lib/compiler.jar'));
+    args.push(opts.jar ? opts.jar : path.resolve('./lib/compiler.jar'));
 
     delete opts.jar;
+
+    if (!opts.create_source_map) {
+      opts.create_source_map = tmp.sync('');
+    }
+
+    if (!opts.source_map_format) {
+      opts.source_map_format = 'V3';
+    }
 
     args.push(flattenFlags(opts));
 
@@ -93,6 +101,7 @@ module.exports = function (options) {
       file.relative = pathParts.pop();
       file.base = pathParts.join('/');
       file.cwd = process.cwd();
+      file.sourceMap = JSON.parse(fs.readFileSync(opts.create_source_map));
 
       file.isStream = function () {
         return false;
