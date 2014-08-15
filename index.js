@@ -47,9 +47,15 @@ module.exports = function (options) {
       this.push(file);
       cb();
     }),
+    target = options.js_output_file,
+    rootDir,
     transform;
 
+  delete options.js_output_file;
+
   transform = through2.obj(function (file, enc, cb) {
+
+    var dir;
 
     if (!file || file.contents === null) {
       this.push(file);
@@ -59,6 +65,9 @@ module.exports = function (options) {
       this.emit('error', 'streaming not supported');
       return cb();
     }
+
+    dir = path.dirname(file.path);
+    rootDir = rootDir ? dir.length < rootDir.length ? dir : rootDir : dir;
 
     files.push(file.path);
     cb();
@@ -92,26 +101,36 @@ module.exports = function (options) {
       }
       console.log('%s', stderr);
 
-      filename = opts.js_output_file || tmp.sync(out);
-      file = fs.lstatSync(filename);
+      filename = target || tmp.sync(stdout);
+
+      file = fs.existsSync(filename) ? fs.lstatSync(filename) : {};
 
       pathParts = filename.split('/');
 
-      file.contents = stdout.toString('utf8');
-      file.relative = pathParts.pop();
-      file.base = pathParts.join('/');
+      file.path = filename;
       file.cwd = process.cwd();
-      file.sourceMap = JSON.parse(fs.readFileSync(opts.create_source_map));
+      file.relative = pathParts.pop();
+      file.base = target ? pathParts.join('/') : file.cwd;
+      file.contents = stdout instanceof Buffer ? stdout : new Buffer(stdout);
 
-      file.isStream = function () {
+      file.sourceMap = JSON.parse(fs.readFileSync(opts.create_source_map));
+      file.sourceMap.sources = file.sourceMap.sources.map(function (src) {
+        return src.replace(rootDir + '/', '');
+      })
+
+      file.isStream = file.isDirectory = function () {
         return false;
       };
       file.isBuffer = function () {
-        return false;
+        return file.contents instanceof Buffer;
       };
       file.isNull = function () {
         return file.contents === null;
       };
+
+      if (target) {
+        fs.createWriteStream(path.resolve(target)).end(file.contents);
+      }
 
       proxy.end(file);
     });
