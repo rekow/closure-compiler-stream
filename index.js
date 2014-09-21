@@ -39,6 +39,17 @@ var through2 = require('through2'),
       flatten(k, v);
     }
     return str.join(' ');
+  },
+
+  flattenModules = function (modules) {
+    var str = [];
+
+    modules.forEach(function (files) {
+      str.push('--module ' + files.shift());
+      str.push('--js ' + files.join(' --js '));
+    });
+
+    return str.join(' ');
   };
 
 module.exports = function (options) {
@@ -48,10 +59,12 @@ module.exports = function (options) {
       cb();
     }),
     target = options.js_output_file,
+    modules = options.module || [],
     rootDir,
     transform;
 
   delete options.js_output_file;
+  delete options.module;
 
   transform = through2.obj(function (file, enc, cb) {
 
@@ -73,7 +86,7 @@ module.exports = function (options) {
     cb();
   }, function () {
     var args = [],
-      opts = merge({
+      opts = merge(modules ? {} : {
         js: files
       }, options);
 
@@ -92,6 +105,7 @@ module.exports = function (options) {
     }
 
     args.push(flattenFlags(opts));
+    args.push(flattenModules(modules));
 
     exec(args.join(' '), function (err, stdout, stderr) {
       var filename, file, pathParts;
@@ -113,10 +127,12 @@ module.exports = function (options) {
       file.base = target ? pathParts.join('/') : file.cwd;
       file.contents = stdout instanceof Buffer ? stdout : new Buffer(stdout);
 
-      file.sourceMap = JSON.parse(fs.readFileSync(opts.create_source_map));
-      file.sourceMap.sources = file.sourceMap.sources.map(function (src) {
-        return src.replace(rootDir + '/', '');
-      })
+      try {
+        file.sourceMap = JSON.parse(fs.readFileSync(opts.create_source_map));
+        file.sourceMap.sources = file.sourceMap.sources.map(function (src) {
+          return src.replace(rootDir + '/', '');
+        });
+      } catch (e) {}
 
       file.isStream = file.isDirectory = function () {
         return false;
