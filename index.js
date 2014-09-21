@@ -86,7 +86,7 @@ module.exports = function (options) {
     cb();
   }, function () {
     var args = [],
-      opts = merge(modules ? {} : {
+      opts = merge(modules.length ? {} : {
         js: files
       }, options);
 
