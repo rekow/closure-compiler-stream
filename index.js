@@ -92,7 +92,7 @@ module.exports = function (options) {
 
     args.push('java');
     args.push('-jar');
-    args.push(opts.jar ? opts.jar : path.resolve('./lib/compiler.jar'));
+    args.push(opts.jar ? opts.jar : path.join(__dirname, 'lib/compiler.jar'));
 
     delete opts.jar;
 

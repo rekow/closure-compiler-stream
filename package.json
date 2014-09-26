@@ -1,7 +1,7 @@
 {
   "name": "closure-compiler-stream",
   "description": "Simple stream interface for closure compiler, with full pipe support.",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "keywords": ["closure", "closure compiler", "stream", "gulp"],
   "homepage": "https://github.com/davidrekow/closure-compiler-stream",
   "author": {
