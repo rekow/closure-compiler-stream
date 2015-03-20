@@ -107,50 +107,55 @@ module.exports = function (options) {
     args.push(flattenFlags(opts));
     args.push(flattenModules(modules));
 
-    exec(args.join(' '), function (err, stdout, stderr) {
-      var filename, file, pathParts;
-      if (err) {
-        proxy.emit('error', err);
-        return;
+    exec(
+      args.join(' '),
+      {
+        maxBuffer: 1024 * 500
+      },
+      function (err, stdout, stderr) {
+        var filename, file, pathParts;
+        if (err) {
+          proxy.emit('error', err);
+          return;
+        }
+        console.log('%s', stderr);
+
+        filename = target || tmp.sync(stdout);
+
+        file = fs.existsSync(filename) ? fs.lstatSync(filename) : {};
+
+        pathParts = filename.split('/');
+
+        file.path = filename;
+        file.cwd = process.cwd();
+        file.relative = pathParts.pop();
+        file.base = target ? pathParts.join('/') : file.cwd;
+        file.contents = stdout instanceof Buffer ? stdout : new Buffer(stdout);
+
+        try {
+          file.sourceMap = JSON.parse(fs.readFileSync(opts.create_source_map));
+          file.sourceMap.sources = file.sourceMap.sources.map(function (src) {
+            return src.replace(rootDir + '/', '');
+          });
+        } catch (e) {}
+
+        file.isStream = file.isDirectory = function () {
+          return false;
+        };
+        file.isBuffer = function () {
+          return file.contents instanceof Buffer;
+        };
+        file.isNull = function () {
+          return file.contents === null;
+        };
+
+        if (target) {
+          fs.createWriteStream(path.resolve(target)).end(file.contents);
+        }
+
+        proxy.end(file);
       }
-      console.log('%s', stderr);
-
-      filename = target || tmp.sync(stdout);
-
-      file = fs.existsSync(filename) ? fs.lstatSync(filename) : {};
-
-      pathParts = filename.split('/');
-
-      file.path = filename;
-      file.cwd = process.cwd();
-      file.relative = pathParts.pop();
-      file.base = target ? pathParts.join('/') : file.cwd;
-      file.contents = stdout instanceof Buffer ? stdout : new Buffer(stdout);
-
-      try {
-        file.sourceMap = JSON.parse(fs.readFileSync(opts.create_source_map));
-        file.sourceMap.sources = file.sourceMap.sources.map(function (src) {
-          return src.replace(rootDir + '/', '');
-        });
-      } catch (e) {}
-
-      file.isStream = file.isDirectory = function () {
-        return false;
-      };
-      file.isBuffer = function () {
-        return file.contents instanceof Buffer;
-      };
-      file.isNull = function () {
-        return file.contents === null;
-      };
-
-      if (target) {
-        fs.createWriteStream(path.resolve(target)).end(file.contents);
-      }
-
-      proxy.end(file);
-    });
-
+    );
   });
 
   transform.pipe = function () {
