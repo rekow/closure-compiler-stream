@@ -118,7 +118,7 @@ module.exports = function (options) {
           proxy.emit('error', err);
           return;
         }
-        console.log('%s', stderr);
+        if (stderr) console.log('%s', stderr);
 
         filename = target || tmp.sync(stdout);
 
